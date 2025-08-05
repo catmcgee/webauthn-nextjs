@@ -14,6 +14,7 @@ import {
 export default function Home() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [joke, setJoke] = useState("");
+  const [username, setUsername] = useState("");
 
   /**
    * Fetch a random joke
@@ -32,19 +33,23 @@ export default function Home() {
   };
 
   /**
-   * Initiates WebAuthn registration for the demo user ("Alice").
+   * Initiates WebAuthn registration
    * On success, automatically treats registration as a login
    */
   const register = async () => {
+    if (!username) {
+      alert("Please enter a username");
+      return;
+    }
     try {
-      const options = await fetch("/api/register/options").then((res) =>
-        res.json()
-      );
+      const options = await fetch(
+        `/api/register/options?u=${encodeURIComponent(username)}`
+      ).then((res) => res.json());
       const attestation = await startRegistration(options);
       const res = await fetch("/api/register/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: "Alice", credential: attestation }),
+        body: JSON.stringify({ username, credential: attestation }),
       });
       const json = await res.json();
       if (json.verified) {
@@ -60,18 +65,22 @@ export default function Home() {
   };
 
   /**
-   * Initiates WebAuthn authentication (login) for the demo user ("Alice")
+   * Initiates WebAuthn authentication (login)
    */
   const login = async () => {
+    if (!username) {
+      alert("Please enter a username");
+      return;
+    }
     try {
-      const options = await fetch("/api/authenticate/options").then((res) =>
-        res.json()
-      );
+      const options = await fetch(
+        `/api/authenticate/options?u=${encodeURIComponent(username)}`
+      ).then((res) => res.json());
       const assertion = await startAuthentication(options);
       const res = await fetch("/api/authenticate/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: "Alice", credential: assertion }),
+        body: JSON.stringify({ username, credential: assertion }),
       });
       const json = await res.json();
       if (json.verified) {
@@ -92,6 +101,7 @@ export default function Home() {
   const logout = () => {
     setLoggedIn(false);
     setJoke("");
+    setUsername("");
   };
 
   // Logged-in UI
@@ -114,6 +124,13 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-gray-800 p-4">
       <h1 className="text-2xl font-semibold mb-6">Passkeys with WebAuthn</h1>
+      <input
+        type="text"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Enter username"
+        className="mb-6 px-3 py-2 border border-gray-300 rounded w-60 text-center"
+      />
       <div className="space-x-4">
         <button
           onClick={register}

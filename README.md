@@ -1,17 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Passkey Demo (Nextjs + SimpleWebAuthn)
 
-## Getting Started
+A tiny Nextjs app that lets you **register** and **sign-in** with a passkey.  
+This is the code used in the WebAuthn starter guide you can find [here](https://hashnode.com/preview/6892556c26ce3f9de6c08fc1)
 
-First, run the development server:
+![App homescreen](public/homescreen.png)
+
+---
+
+## What it does
+
+1. Type your username
+1. Click **Register** → WebAuthn registration ceremony
+1. Click **Login** → authentication ceremony
+
+Learn more about WebAuthn in the [starter guide](https://hashnode.com/preview/6892556c26ce3f9de6c08fc1).
+
+## Prerequisites
+
+- **Node 20+**
+- A modern browser that supports passkeys (Chrome, Edge, Safari, Firefox ≥ 120)
+
+---
+
+## How to run it
+
+Clone this repo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+git clone https://github.com/catmcgee/webauthn-nextjs.git
+cd webauth-nextjs
+```
+
+Install dependencies
+
+```bash
+bun install
+```
+
+I like bun :) but you can also use `npm install` or `yarn install` or `pnpm install`.
+
+# 2. Configure .env
+
+```bash
+cp .env.local.example .env.local
+```
+
+Defaults are fine for localhost
+
+# 3. Run dev server
+
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Again you can also use `npm install` or `yarn install` or `pnpm install`.
