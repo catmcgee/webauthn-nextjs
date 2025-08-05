@@ -39,12 +39,8 @@ export async function regOptions(username: string) {
     attestationType: "none",
     excludeCredentials: (db.store.get(username) || []).map((p) => ({
       id: p.id,
-      transports: [
-        "internal",
-        "hybrid",
-        "usb",
-      ] as AuthenticatorTransportFuture[],
     })),
+    supportedAlgorithmIDs: [-7],
   });
   db.regChal.set(username, options.challenge);
   return options;
@@ -93,7 +89,6 @@ export async function regVerify(
 export async function authOptions(username: string) {
   const allowCredentials = (db.store.get(username) || []).map((p) => ({
     id: p.id,
-    transports: ["internal", "hybrid", "usb"] as AuthenticatorTransportFuture[],
   }));
 
   const options = await generateAuthenticationOptions({
@@ -130,11 +125,6 @@ export async function authVerify(
       publicKey: creds.publicKey,
       counter: creds.counter,
       id: creds.id,
-      transports: [
-        "internal",
-        "hybrid",
-        "usb",
-      ] as AuthenticatorTransportFuture[],
     },
   });
 
