@@ -14,7 +14,6 @@ import {
 import type {
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
-  AuthenticatorTransportFuture,
 } from "@simplewebauthn/types";
 import { db } from "./passkeys";
 import { Buffer } from "buffer";
@@ -42,7 +41,7 @@ export async function regOptions(username: string) {
     })),
     supportedAlgorithmIDs: [-7],
   });
-  db.regChal.set(username, options.challenge);
+  db.registerChallenge.set(username, options.challenge);
   return options;
 }
 
@@ -57,7 +56,7 @@ export async function regVerify(
   username: string,
   body: RegistrationResponseJSON
 ) {
-  const expectedChallenge = db.regChal.get(username) ?? "";
+  const expectedChallenge = db.registerChallenge.get(username) ?? "";
   const verification = await verifyRegistrationResponse({
     response: body,
     expectedChallenge,
@@ -96,7 +95,7 @@ export async function authOptions(username: string) {
     allowCredentials,
   });
 
-  db.authChal.set(username, options.challenge);
+  db.authChallenge.set(username, options.challenge);
   return options;
 }
 
@@ -111,7 +110,7 @@ export async function authVerify(
   username: string,
   body: AuthenticationResponseJSON
 ) {
-  const expectedChallenge = db.authChal.get(username) ?? "";
+  const expectedChallenge = db.authChallenge.get(username) ?? "";
 
   const creds = (db.store.get(username) || []).find((c) => c.id === body.id);
   if (!creds) return false;

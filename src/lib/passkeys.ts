@@ -13,7 +13,7 @@ export type Passkey = {
  * Map of user → registered passkeys
  */
 const store = new Map<string, Passkey[]>();
-const regChal = new Map<string, string>(); // registration challenge per user
-const authChal = new Map<string, string>(); // auth challenge per user
+const registerChallenge = new Map<string, string>(); // registration challenge per user
+const authChallenge = new Map<string, string>(); // auth challenge per user
 
-export const db = { store, regChal, authChal };
+export const db = { store, registerChallenge, authChallenge };
