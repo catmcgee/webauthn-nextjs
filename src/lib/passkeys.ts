@@ -4,9 +4,7 @@
  */
 
 export type Passkey = {
-  id: string; // credential identifier
-  publicKey: Uint8Array; // raw public key returned by the authenticator
-  counter: number; // signature counter
+  // TODO add fields we store in the db
 };
 
 /**

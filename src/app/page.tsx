@@ -12,13 +12,8 @@ import {
  *  - Displays a random joke once logged in :)
  */
 export default function Home() {
-  const [loggedIn, setLoggedIn] = useState(false);
   const [joke, setJoke] = useState("");
-  const [username, setUsername] = useState("");
 
-  /**
-   * Fetch a random joke
-   */
   const fetchJoke = async () => {
     try {
       const res = await fetch(
@@ -36,65 +31,12 @@ export default function Home() {
    * Initiates WebAuthn registration
    * On success, automatically treats registration as a login
    */
-  const register = async () => {
-    if (!username) {
-      alert("Please enter a username");
-      return;
-    }
-    try {
-      const options = await fetch(
-        `/api/register/options?u=${encodeURIComponent(username)}`
-      ).then((res) => res.json());
-      const attestation = await startRegistration(options);
-      const res = await fetch("/api/register/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, credential: attestation }),
-      });
-      const json = await res.json();
-      if (json.verified) {
-        await fetchJoke();
-        setLoggedIn(true);
-      } else {
-        alert("Registration failed");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Registration failed");
-    }
-  };
+  // TODO function to register
 
   /**
    * Initiates WebAuthn authentication (login)
    */
-  const login = async () => {
-    if (!username) {
-      alert("Please enter a username");
-      return;
-    }
-    try {
-      const options = await fetch(
-        `/api/authenticate/options?u=${encodeURIComponent(username)}`
-      ).then((res) => res.json());
-      const assertion = await startAuthentication(options);
-      const res = await fetch("/api/authenticate/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, credential: assertion }),
-      });
-      const json = await res.json();
-      if (json.verified) {
-        await fetchJoke();
-        setLoggedIn(true);
-      } else {
-        alert("Login failed – did you register first?");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Login failed – did you register first?");
-    }
-  };
-
+  // TODO function to login
   /**
    * Simple logout – just clears client-side session state
    */
