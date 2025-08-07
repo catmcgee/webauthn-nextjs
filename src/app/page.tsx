@@ -1,24 +1,87 @@
 "use client";
-import { useState } from "react";
-import {
-  startRegistration,
-  startAuthentication,
-} from "@simplewebauthn/browser";
+import { usePrivy } from "@privy-io/react-auth";
+import { useSignupWithPasskey } from "@privy-io/react-auth";
+import { useLoginWithPasskey } from "@privy-io/react-auth";
 
-/**
- * Homepage component
- *  - Passkey registration & authentication
- *  - A simple "session" held in client state
- *  - Displays a random joke once logged in :)
- */
+import { useState, useEffect, useCallback } from "react";
+
 export default function Home() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [joke, setJoke] = useState("");
-  const [username, setUsername] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState<
-    "register" | "login" | "logout" | null
-  >(null);
+  const { ready, authenticated, user, logout } = usePrivy();
+  const [joke, setJoke] = useState<string | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const destination = "0x62f4F40043D67a12febe79E3868237FE11b87251"; // catmcgee.eth hehehe
+
+  const fetchJoke = async () => {
+    try {
+      const res = await fetch(
+        "https://official-joke-api.appspot.com/random_joke"
+      );
+      const data = await res.json();
+      setJoke(`${data.setup} - ${data.punchline}`);
+    } catch (err) {
+      console.error(err);
+      setJoke("Couldn't fetch a joke right now 🤷‍♀️");
+    }
+  };
+
+  const fetchServerWallet = useCallback(async () => {
+    if (!user) return;
+    try {
+      const res = await fetch("/api/server-wallet", {
+        headers: {
+          "x-privy-user-id": user.id,
+        },
+      });
+      if (!res.ok) throw new Error("Failed to fetch server wallet");
+      const json = (await res.json()) as { address: string };
+      setWalletAddress(json.address);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [user]);
+
+  const handleSend = async () => {
+    if (!user) return;
+    try {
+      setSending(true);
+      const res = await fetch("/api/gasless/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-privy-user-id": user.id,
+        },
+        body: JSON.stringify({ to: destination, amountEth: "0" }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Tx failed");
+      setTxHash(json.txHash);
+    } catch (err) {
+      console.error(err);
+      alert("Transaction failed");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const { signupWithPasskey, state: signupState } = useSignupWithPasskey();
+  const { loginWithPasskey, state: loginState } = useLoginWithPasskey();
+
+  useEffect(() => {
+    if (authenticated) {
+      fetchJoke();
+      fetchServerWallet();
+    } else {
+      setTxHash(null);
+    }
+  }, [authenticated, fetchServerWallet]);
+
+  const loading =
+    !ready ||
+    (signupState.status !== "initial" && signupState.status !== "done") ||
+    (loginState.status !== "initial" && loginState.status !== "done") ||
+    false;
 
   const Spinner = () => (
     <svg
@@ -43,164 +106,99 @@ export default function Home() {
     </svg>
   );
 
-  const fetchJoke = async () => {
-    try {
-      const res = await fetch(
-        "https://official-joke-api.appspot.com/random_joke"
-      );
-      const data = await res.json();
-      setJoke(`${data.setup} — ${data.punchline}`);
-    } catch (err) {
-      console.error(err);
-      setJoke("Couldn't fetch a joke right now 🤷‍♀️");
-    }
-  };
-
-  const register = async () => {
-    if (!username) {
-      setError("Please enter a username");
-      return;
-    }
-    if (loading) return;
-
-    setLoading("register");
-    setError("");
-    try {
-      const options = await fetch(
-        `/api/register/options?u=${encodeURIComponent(username)}`
-      ).then((res) => res.json());
-      const attestation = await startRegistration(options);
-      const res = await fetch("/api/register/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, credential: attestation }),
-      });
-      const json = await res.json();
-      if (json.verified) {
-        await fetchJoke();
-        setLoggedIn(true);
-      } else {
-        setError("Registration failed");
-      }
-    } catch (err) {
-      console.error(err);
-      setError((err as Error).message || "Registration failed");
-    } finally {
-      setLoading(null);
-    }
-  };
-
-  const login = async () => {
-    if (!username) {
-      setError("Please enter a username");
-      return;
-    }
-    if (loading) return;
-
-    setLoading("login");
-    setError("");
-    try {
-      const options = await fetch(
-        `/api/authenticate/options?u=${encodeURIComponent(username)}`
-      ).then((res) => res.json());
-      const assertion = await startAuthentication(options);
-      const res = await fetch("/api/authenticate/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, credential: assertion }),
-      });
-      const json = await res.json();
-      if (json.verified) {
-        await fetchJoke();
-        setLoggedIn(true);
-      } else {
-        setError("Login failed – did you register first?");
-      }
-    } catch (err) {
-      console.error(err);
-      setError(
-        (err as Error).message || "Login failed – did you register first?"
-      );
-    } finally {
-      setLoading(null);
-    }
-  };
-
-  const logout = async () => {
-    if (loading) return;
-    setLoading("logout");
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      setLoggedIn(false);
-      setJoke("");
-      setUsername("");
-      setError("");
-    } finally {
-      setLoading(null);
-    }
-  };
-
-  if (loggedIn) {
+  if (!ready) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-purple-100 text-emerald-900 p-4">
-        <h1 className="text-2xl font-bold mb-4">Logged in and locked in ☘️</h1>
-        {error && (
-          <p className="text-red-600 mb-4 max-w-lg text-center">{error}</p>
-        )}
-        <p className="mb-6 max-w-lg text-center">{joke}</p>
+      <main className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </main>
+    );
+  }
+
+  if (authenticated) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center bg-purple-100 text-emerald-900 p-4 relative">
+        <div className="absolute top-4 right-4 flex items-center space-x-2">
+          {walletAddress && (
+            <span title={walletAddress} className="text-xs font-mono px-2 py-1">
+              {walletAddress}
+            </span>
+          )}
+          <button
+            onClick={() => {
+              setTxHash(null);
+              logout();
+            }}
+            disabled={loading}
+            className={`flex items-center justify-center bg-red-200 text-red-800 font-medium px-3 py-1 rounded transition-colors ${
+              loading ? "opacity-50 cursor-not-allowed" : "hover:bg-red-300"
+            }`}
+          >
+            {loading && <Spinner />}
+            Logout
+          </button>
+        </div>
+
+        <h1 className="text-2xl font-bold mb-4 text-center">
+          Logged in and locked in ☘️ <br />
+          (to the blockchain)
+        </h1>
+
+        <p className="mb-4 text-center">{joke}</p>
+
         <button
-          onClick={logout}
-          disabled={loading === "logout"}
-          className={`flex items-center justify-center bg-red-200 text-red-800 font-medium px-5 py-2 rounded transition-colors ${
-            loading === "logout"
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-red-300"
+          onClick={handleSend}
+          disabled={sending}
+          className={`flex items-center justify-center bg-emerald-200 text-emerald-800 font-medium px-5 py-2 rounded transition-colors mb-4 ${
+            sending ? "opacity-50 cursor-not-allowed" : "hover:bg-emerald-300"
           }`}
         >
-          {loading === "logout" && <Spinner />}
-          Logout
+          {sending && <Spinner />}
+          Send Cat 0 ETH (gasless)
         </button>
+
+        {txHash && (
+          <>
+            <p className="mb-2 text-sm break-all">
+              Tx Hash:{" "}
+              <a
+                href={`https://sepolia.basescan.org/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:no-underline"
+              >
+                {txHash}
+              </a>
+            </p>
+          </>
+        )}
       </main>
     );
   }
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-gray-800 p-4">
-      <h1 className="text-2xl font-semibold mb-6">Passkeys with WebAuthn</h1>
-      {error && (
-        <p className="text-red-600 mb-4 max-w-xs text-center">{error}</p>
-      )}
-      <input
-        type="text"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        placeholder="Enter username"
-        className="mb-6 px-3 py-2 border border-gray-300 rounded w-60 text-center"
-        disabled={loading !== null}
-      />
+      <h1 className="text-2xl font-semibold mb-6">
+        Does it feel like a wallet?
+      </h1>
       <div className="space-x-4 flex">
         <button
-          onClick={register}
-          disabled={loading !== null}
+          onClick={() => signupWithPasskey()}
+          disabled={loading}
           className={`flex items-center justify-center bg-emerald-200 text-emerald-800 font-medium px-5 py-2 rounded transition-colors ${
-            loading !== null
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-emerald-300"
+            loading ? "opacity-50 cursor-not-allowed" : "hover:bg-emerald-300"
           }`}
         >
-          {loading === "register" && <Spinner />}
+          {loading && <Spinner />}
           Register
         </button>
         <button
-          onClick={login}
-          disabled={loading !== null}
+          onClick={() => loginWithPasskey()}
+          disabled={loading}
           className={`flex items-center justify-center bg-purple-200 text-purple-800 font-medium px-5 py-2 rounded transition-colors ${
-            loading !== null
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-purple-300"
+            loading ? "opacity-50 cursor-not-allowed" : "hover:bg-purple-300"
           }`}
         >
-          {loading === "login" && <Spinner />}
+          {loading && <Spinner />}
           Login
         </button>
       </div>

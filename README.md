@@ -1,21 +1,21 @@
-# Passkey Demo (Nextjs + SimpleWebAuthn)
+# Passkeys in Privy demo
 
-A tiny Nextjs app that lets you **register** and **sign-in** with a passkey.  
-This is the code used in the WebAuthn starter guide you can find [here](https://hashnode.com/preview/6892556c26ce3f9de6c08fc1)
+A tiny Nextjs app that lets you create and login to a Privy wallet with passkey. You can also send a gasless transaction.
 
-Test it out yourself [here](https://webauthn.mcgee.cat)
+Test it out yourself [here](https://privy.mcgee.cat)
 
 ![App homescreen](public/homescreen.png)
+![Loggedin screen](public/loggedin.png)
 
 ---
 
 ## What it does
 
 1. Type your username
-1. Click **Register** → WebAuthn registration ceremony
-1. Click **Login** → authentication ceremony
+1. Click **Register** → Creates privy wallet with passkey
+1. Click **Login** → Logs in to privy wallet with passkey
 
-Learn more about WebAuthn in the [starter guide](https://hashnode.com/preview/6892556c26ce3f9de6c08fc1).
+Learn more about Privy [here](https://www.privy.io/).
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ Learn more about WebAuthn in the [starter guide](https://hashnode.com/preview/68
 Clone this repo
 
 ```bash
-git clone https://github.com/catmcgee/webauthn-nextjs.git
+git clone --branch privy https://github.com/catmcgee/webauthn-nextjs.git privy-example
 cd webauth-nextjs
 ```
 
@@ -47,7 +47,7 @@ I like bun :) but you can also use `npm install` or `yarn install` or `pnpm inst
 cp .env.local.example .env.local
 ```
 
-Defaults are fine for localhost
+You will need to get privy and pimlico API keys. Free is fine. You can do that [here](https://dashboard.privy.io/) and [here](https://dashboard.pimlico.io/). You will also need to set up a policy ID in Pimlico.
 
 # 3. Run dev server
 
@@ -55,4 +55,4 @@ Defaults are fine for localhost
 bun dev
 ```
 
-Again you can also use `npm install` or `yarn install` or `pnpm install`.
+Again you can also use `npm dev` or `yarn dev` or `pnpm dev`.
