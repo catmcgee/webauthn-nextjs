@@ -29,6 +29,7 @@ const origin = process.env.NEXT_PUBLIC_ORIGIN!;
  * @returns Options that should be passed to `navigator.credentials.create`
  */
 // TODO function to register options
+export async function regOptions(username: string) {}
 
 /**
  * Verify the client's response to a registration ceremony
@@ -38,6 +39,10 @@ const origin = process.env.NEXT_PUBLIC_ORIGIN!;
  * @returns `true` if the response is valid and stored in memory, if not `false`
  */
 // TODO function to verify registration
+export async function regVerify(
+  username: string,
+  body: RegistrationResponseJSON
+) {}
 
 /**
  * Generate WebAuthn authentication options (assertion challenge)
@@ -46,6 +51,7 @@ const origin = process.env.NEXT_PUBLIC_ORIGIN!;
  * @returns Options that should be passed to `navigator.credentials.get`
  */
 // TODO function to generate authentication options
+export async function authOptions(username: string) {}
 
 /**
  * Verify the client's response to authentication (login)
@@ -55,3 +61,7 @@ const origin = process.env.NEXT_PUBLIC_ORIGIN!;
  * @returns `true` if the assertion is valid, else `false`
  */
 // TODO function to verify authentication
+export async function authVerify(
+  username: string,
+  body: AuthenticationResponseJSON
+) {}

@@ -13,6 +13,8 @@ import {
  */
 export default function Home() {
   const [joke, setJoke] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
 
   const fetchJoke = async () => {
     try {
@@ -32,11 +34,14 @@ export default function Home() {
    * On success, automatically treats registration as a login
    */
   // TODO function to register
+  const register = async () => {};
 
   /**
    * Initiates WebAuthn authentication (login)
    */
   // TODO function to login
+  const login = async () => {};
+
   /**
    * Simple logout – just clears client-side session state
    */
