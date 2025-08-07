@@ -16,7 +16,6 @@ import type {
   AuthenticationResponseJSON,
 } from "@simplewebauthn/types";
 import { db } from "./passkeys";
-import { Buffer } from "buffer";
 
 const rpName = process.env.NEXT_PUBLIC_RP_NAME!;
 const rpID = process.env.NEXT_PUBLIC_RP_ID!;
