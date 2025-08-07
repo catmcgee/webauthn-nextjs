@@ -20,7 +20,6 @@ import { Buffer } from "buffer";
 
 const rpName = process.env.NEXT_PUBLIC_RP_NAME!;
 const rpID = process.env.NEXT_PUBLIC_RP_ID!;
-const origin = process.env.NEXT_PUBLIC_ORIGIN!;
 
 /**
  * Generate WebAuthn registration options for the user
