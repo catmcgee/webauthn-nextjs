@@ -2,7 +2,7 @@
 
 A tiny Nextjs app that lets you create and login to a Privy wallet with passkey. You can also send a gasless transaction.
 
-Test it out yourself [here](https://privy.mcgee.cat)
+Test it out yourself [here](https://privy.mcgee.cat)!
 
 ![App homescreen](public/homescreen.png)
 ![Loggedin screen](public/loggedin.png)
