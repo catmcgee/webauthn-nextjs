@@ -3,6 +3,8 @@
 A tiny Nextjs app that lets you **register** and **sign-in** with a passkey.  
 This is the code used in the WebAuthn starter guide you can find [here](https://hashnode.com/preview/6892556c26ce3f9de6c08fc1)
 
+Test it out yourself [here](https://webauthn.mcgee.cat)
+
 ![App homescreen](public/homescreen.png)
 
 ---
