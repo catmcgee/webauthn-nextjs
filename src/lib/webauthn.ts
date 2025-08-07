@@ -20,7 +20,6 @@ import { Buffer } from "buffer";
 
 const rpName = process.env.NEXT_PUBLIC_RP_NAME!;
 const rpID = process.env.NEXT_PUBLIC_RP_ID!;
-const origin = process.env.NEXT_PUBLIC_ORIGIN!;
 
 /**
  * Generate WebAuthn registration options for the user
@@ -29,11 +28,9 @@ const origin = process.env.NEXT_PUBLIC_ORIGIN!;
  * @returns Options that should be passed to `navigator.credentials.create`
  */
 export async function regOptions(username: string) {
-  const userID = Buffer.from(username, "utf8");
   const options = await generateRegistrationOptions({
     rpName,
     rpID,
-    userID,
     userName: username,
     attestationType: "none",
     excludeCredentials: (db.store.get(username) || []).map((p) => ({
