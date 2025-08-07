@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WebAuthn Passkeys",
-  description: "A demo of WebAuthn in Nextjs",
+  title: "Privy demo",
+  description: "A demo of Privy passkeys",
 };
 
 export default function RootLayout({
